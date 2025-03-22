@@ -28,74 +28,110 @@ function showSuccess(message) {
 
 // Function to calculate which league a team will be promoted to
 function getPromotedLeague(currentDivision, currentLeague) {
-    // When promoting, teams go to the league number that corresponds to their current league's position
-    // For example: League 1 and 2 from Div 3 go to League 1 in Div 2
-    //             League 3 and 4 from Div 3 go to League 2 in Div 2
+    // In Footium, teams from leagues 1-2 go to league 1
+    // Teams from leagues 3-4 go to league 2, etc.
     return Math.ceil(currentLeague / 2);
 }
 
-// Function to calculate convergence
-function calculateConvergence(divA, leagueA, divB, leagueB) {
-    console.log('Calculating convergence for:', { divA, leagueA, divB, leagueB });
-    
-    // If teams are in the same division and league, they're already together
-    if (divA === divB && leagueA === leagueB) {
-        return {
-            division: divA,
-            league: leagueA,
-            seasons: 0
-        };
+// Function to check if teams can meet in the same league
+function canTeamsMeet(divA, leagueA, divB, leagueB) {
+    // If teams are in the same division
+    if (divA === divB) {
+        // They can meet if they're in the same league or can be promoted to the same league
+        return leagueA === leagueB || Math.ceil(leagueA / 2) === Math.ceil(leagueB / 2);
     }
+    return false;
+}
 
-    let currentDivA = divA;
-    let currentLeagueA = leagueA;
-    let currentDivB = divB;
-    let currentLeagueB = leagueB;
-    let seasons = 0;
-
-    // Keep calculating until teams converge
-    while (currentDivA !== currentDivB || currentLeagueA !== currentLeagueB) {
-        // Team A promotion (if not in Division 1)
-        if (currentDivA > 1) {
-            // Promote to the division above
-            currentDivA--;
-            currentLeagueA = getPromotedLeague(currentDivA + 1, currentLeagueA);
-        }
-
-        // Team B promotion (if not in Division 1)
-        if (currentDivB > 1) {
-            // Promote to the division above
-            currentDivB--;
-            currentLeagueB = getPromotedLeague(currentDivB + 1, currentLeagueB);
-        }
-
-        // If both teams are in the same division but different leagues
-        if (currentDivA === currentDivB && currentLeagueA !== currentLeagueB) {
-            // In the same division, teams will only meet if they get promoted to the same league
-            // We need to find the common league they'll end up in when promoted
-            const commonLeague = Math.min(currentLeagueA, currentLeagueB);
-            currentLeagueA = commonLeague;
-            currentLeagueB = commonLeague;
-        }
-
-        seasons++;
-        console.log(`Season ${seasons}:`, {
-            teamA: { division: currentDivA, league: currentLeagueA },
-            teamB: { division: currentDivB, league: currentLeagueB }
-        });
-
-        // If both teams reach Division 1, they must converge in League 1
-        if (currentDivA === 1 && currentDivB === 1) {
-            currentLeagueA = 1;
-            currentLeagueB = 1;
-        }
-    }
-
-    return {
-        division: currentDivA,
-        league: currentLeagueA,
-        seasons: seasons
+// Function to find all possible promotion paths
+function findConvergencePaths(divA, leagueA, divB, leagueB, maxSeasons = 10) {
+    // State includes: divA, leagueA, divB, leagueB, seasons
+    let initialState = {
+        divA, leagueA, divB, leagueB,
+        seasons: 0,
+        path: []
     };
+    
+    let queue = [initialState];
+    let bestResult = null;
+
+    while (queue.length > 0) {
+        let current = queue.shift();
+        
+        // Check if teams have converged
+        if (canTeamsMeet(current.divA, current.leagueA, current.divB, current.leagueB)) {
+            if (bestResult === null || current.seasons < bestResult.seasons) {
+                bestResult = {
+                    division: current.divA,
+                    league: Math.min(current.leagueA, current.leagueB),
+                    seasons: current.seasons,
+                    path: current.path
+                };
+            }
+            continue;
+        }
+
+        // Don't explore paths longer than our current best or maxSeasons
+        if (current.seasons >= maxSeasons || 
+            (bestResult !== null && current.seasons >= bestResult.seasons)) {
+            continue;
+        }
+
+        // Try all possible promotion combinations for next season
+        
+        // Option 1: Only Team A promotes
+        if (current.divA > 1) {
+            queue.push({
+                divA: current.divA - 1,
+                leagueA: getPromotedLeague(current.divA, current.leagueA),
+                divB: current.divB,
+                leagueB: current.leagueB,
+                seasons: current.seasons + 1,
+                path: [...current.path, 'A']
+            });
+        }
+
+        // Option 2: Only Team B promotes
+        if (current.divB > 1) {
+            queue.push({
+                divA: current.divA,
+                leagueA: current.leagueA,
+                divB: current.divB - 1,
+                leagueB: getPromotedLeague(current.divB, current.leagueB),
+                seasons: current.seasons + 1,
+                path: [...current.path, 'B']
+            });
+        }
+
+        // Option 3: Both teams promote
+        if (current.divA > 1 && current.divB > 1) {
+            queue.push({
+                divA: current.divA - 1,
+                leagueA: getPromotedLeague(current.divA, current.leagueA),
+                divB: current.divB - 1,
+                leagueB: getPromotedLeague(current.divB, current.leagueB),
+                seasons: current.seasons + 1,
+                path: [...current.path, 'AB']
+            });
+        }
+    }
+
+    return bestResult;
+}
+
+// Function to describe the convergence path
+function describeConvergencePath(path) {
+    if (!path || path.length === 0) return "";
+    
+    let description = "\n\nPath to convergence:\n";
+    path.forEach((step, index) => {
+        description += `Season ${index + 1}: `;
+        if (step === 'A') description += "Team A promotes";
+        else if (step === 'B') description += "Team B promotes";
+        else if (step === 'AB') description += "Both teams promote";
+        description += "\n";
+    });
+    return description;
 }
 
 // Wait for DOM to be fully loaded
@@ -160,13 +196,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('Input values:', { divA, leagueA, divB, leagueB });
 
-            const result = calculateConvergence(divA, leagueA, divB, leagueB);
+            // If teams are already in the same division and league or can promote to same league
+            if (canTeamsMeet(divA, leagueA, divB, leagueB)) {
+                if (divA === divB && leagueA === leagueB) {
+                    showSuccess('Teams are already in the same league!');
+                } else {
+                    showSuccess(`Teams can meet next season in Division ${divA - 1}, League ${Math.ceil(Math.min(leagueA, leagueB) / 2)} after 1 season.`);
+                }
+                return;
+            }
+
+            const result = findConvergencePaths(divA, leagueA, divB, leagueB);
             console.log('Calculation result:', result);
             
-            if (result.seasons === 0) {
-                showSuccess('Teams are already in the same league!');
+            if (result) {
+                let message = `Teams can first meet in Division ${result.division}, League ${result.league} after ${result.seasons} season${result.seasons > 1 ? 's' : ''}.`;
+                message += describeConvergencePath(result.path);
+                showSuccess(message);
             } else {
-                showSuccess(`Teams will converge in Division ${result.division} - League ${result.league} after ${result.seasons} season${result.seasons > 1 ? 's' : ''}.`);
+                showError('Could not find a convergence path within 10 seasons.');
             }
         } catch (error) {
             console.error('Calculation error:', error);
