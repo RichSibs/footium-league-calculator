@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footium League Calculator Tests</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #results {
+            white-space: pre-wrap;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .pass { color: green; }
+        .fail { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Footium League Calculator Tests</h1>
+    <div id="results"></div>
+    <script src="test.js"></script>
+    <script>
+        // Override console.log to write to the results div
+        const resultsDiv = document.getElementById('results');
+        const originalLog = console.log;
+        console.log = function(message) {
+            originalLog.apply(console, arguments);
+            const line = document.createElement('div');
+            line.textContent = message;
+            if (message.includes('✅')) line.className = 'pass';
+            if (message.includes('❌')) line.className = 'fail';
+            resultsDiv.appendChild(line);
+        };
+    </script>
+</body>
+</html> 
