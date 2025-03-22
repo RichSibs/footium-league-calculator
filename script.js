@@ -14,16 +14,16 @@ const leagueStructure = {
 function showError(message) {
     const resultDiv = document.getElementById('result');
     resultDiv.textContent = `Error: ${message}`;
-    resultDiv.style.backgroundColor = '#f8d7da';
-    resultDiv.style.color = '#721c24';
+    resultDiv.style.backgroundColor = 'var(--dark-bg)';
+    resultDiv.style.color = 'var(--accent-color)';
 }
 
 // Function to show success message
 function showSuccess(message) {
     const resultDiv = document.getElementById('result');
-    resultDiv.textContent = message;
-    resultDiv.style.backgroundColor = '#e8f4f8';
-    resultDiv.style.color = '#2c3e50';
+    resultDiv.innerHTML = message;
+    resultDiv.style.backgroundColor = 'var(--dark-bg)';
+    resultDiv.style.color = 'var(--text-color)';
 }
 
 // Function to calculate which league a team will be promoted to
@@ -123,13 +123,15 @@ function findConvergencePaths(divA, leagueA, divB, leagueB, maxSeasons = 10) {
 function describeConvergencePath(path) {
     if (!path || path.length === 0) return "";
     
-    let description = "\n\nPath to convergence:\n";
+    let description = "\n\n";
+    description += '<div class="path-header">Path to Convergence:</div>';
+    
     path.forEach((step, index) => {
-        description += `Season ${index + 1}: `;
-        if (step === 'A') description += "Team A promotes";
-        else if (step === 'B') description += "Team B promotes";
-        else if (step === 'AB') description += "Both teams promote";
-        description += "\n";
+        let seasonText = `Season ${index + 1}: `;
+        if (step === 'A') seasonText += "Team A promotes";
+        else if (step === 'B') seasonText += "Team B promotes";
+        else if (step === 'AB') seasonText += "Both teams promote";
+        description += `<div class="path-season">${seasonText}</div>`;
     });
     return description;
 }
@@ -144,13 +146,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const teamBDivision = document.getElementById('teamB-division');
     const teamBLeague = document.getElementById('teamB-league');
     const calculateButton = document.getElementById('calculate');
+    const resetButton = document.getElementById('reset');
     const resultDiv = document.getElementById('result');
     const loadingDiv = document.getElementById('loading');
 
     // Check if all required elements are present
-    if (!teamADivision || !teamALeague || !teamBDivision || !teamBLeague || !calculateButton || !resultDiv || !loadingDiv) {
+    if (!teamADivision || !teamALeague || !teamBDivision || !teamBLeague || !calculateButton || !resetButton || !resultDiv || !loadingDiv) {
         showError('Failed to initialize calculator. Please refresh the page.');
         return;
+    }
+
+    // Function to reset the form
+    function resetForm() {
+        teamADivision.value = "1";
+        teamBDivision.value = "1";
+        updateLeagueOptions(teamADivision, teamALeague);
+        updateLeagueOptions(teamBDivision, teamBLeague);
+        resultDiv.textContent = '';
+        resultDiv.style.backgroundColor = '#e8f4f8';
+        resultDiv.style.color = '#2c3e50';
     }
 
     // Function to update league options based on division
@@ -185,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Team B division changed');
         updateLeagueOptions(teamBDivision, teamBLeague);
     });
+
+    resetButton.addEventListener('click', resetForm);
 
     calculateButton.addEventListener('click', () => {
         console.log('Calculate button clicked');

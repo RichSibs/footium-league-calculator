@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footium League Convergence Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Outfit:wght@300;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h1>Footium League Convergence Calculator</h1>
+        <p class="subtitle">discover when two teams will meet</p>
         <div id="loading" class="loading">Loading calculator...</div>
         <div class="calculator">
             <div class="team-inputs">
@@ -53,7 +57,10 @@
                     </div>
                 </div>
             </div>
-            <button id="calculate">Calculate Convergence</button>
+            <div class="button-container">
+                <button id="calculate">Calculate Convergence</button>
+                <button id="reset">Reset</button>
+            </div>
             <div id="result" class="result"></div>
         </div>
     </div>
