@@ -1,13 +1,13 @@
 // League structure configuration
 const leagueStructure = {
-    1: 1,    // Division 1: 1 league
-    2: 2,    // Division 2: 2 leagues
-    3: 4,    // Division 3: 4 leagues
+    1: 1,    // Division 1: 1 league (12 clubs)
+    2: 2,    // Division 2: 2 leagues (24 clubs)
+    3: 4,    // Division 3: 4 leagues (48 clubs)
     4: 8,    // Division 4: 8 leagues
     5: 16,   // Division 5: 16 leagues
     6: 32,   // Division 6: 32 leagues
     7: 64,   // Division 7: 64 leagues
-    8: 128   // Division 8: 128 leagues
+    8: 128   // Division 8: 128 leagues (1536 clubs)
 };
 
 // Function to show error message
@@ -26,8 +26,11 @@ function showSuccess(message) {
     resultDiv.style.color = '#2c3e50';
 }
 
-// Function to calculate which league a team will be in after promotion
-function getPromotedLeague(currentLeague) {
+// Function to calculate which league a team will be promoted to
+function getPromotedLeague(currentDivision, currentLeague) {
+    // When promoting, teams go to the league number that corresponds to their current league's position
+    // For example: League 1 and 2 from Div 3 go to League 1 in Div 2
+    //             League 3 and 4 from Div 3 go to League 2 in Div 2
     return Math.ceil(currentLeague / 2);
 }
 
@@ -52,23 +55,27 @@ function calculateConvergence(divA, leagueA, divB, leagueB) {
 
     // Keep calculating until teams converge
     while (currentDivA !== currentDivB || currentLeagueA !== currentLeagueB) {
-        // Team A promotion
+        // Team A promotion (if not in Division 1)
         if (currentDivA > 1) {
+            // Promote to the division above
             currentDivA--;
-            currentLeagueA = getPromotedLeague(currentLeagueA);
+            currentLeagueA = getPromotedLeague(currentDivA + 1, currentLeagueA);
         }
 
-        // Team B promotion
+        // Team B promotion (if not in Division 1)
         if (currentDivB > 1) {
+            // Promote to the division above
             currentDivB--;
-            currentLeagueB = getPromotedLeague(currentLeagueB);
+            currentLeagueB = getPromotedLeague(currentDivB + 1, currentLeagueB);
         }
 
-        // If teams are in the same division but different leagues, they need to merge
+        // If both teams are in the same division but different leagues
         if (currentDivA === currentDivB && currentLeagueA !== currentLeagueB) {
-            // Teams will merge into the lower league number
-            currentLeagueA = Math.min(currentLeagueA, currentLeagueB);
-            currentLeagueB = currentLeagueA;
+            // In the same division, teams will only meet if they get promoted to the same league
+            // We need to find the common league they'll end up in when promoted
+            const commonLeague = Math.min(currentLeagueA, currentLeagueB);
+            currentLeagueA = commonLeague;
+            currentLeagueB = commonLeague;
         }
 
         seasons++;
@@ -76,6 +83,12 @@ function calculateConvergence(divA, leagueA, divB, leagueB) {
             teamA: { division: currentDivA, league: currentLeagueA },
             teamB: { division: currentDivB, league: currentLeagueB }
         });
+
+        // If both teams reach Division 1, they must converge in League 1
+        if (currentDivA === 1 && currentDivB === 1) {
+            currentLeagueA = 1;
+            currentLeagueB = 1;
+        }
     }
 
     return {
