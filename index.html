@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footium League Convergence Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Footium League Convergence Calculator</h1>
+        <div id="loading" class="loading">Loading calculator...</div>
+        <div class="calculator">
+            <div class="team-inputs">
+                <div class="team">
+                    <h2>Team A</h2>
+                    <div class="input-group">
+                        <label for="teamA-division">Division:</label>
+                        <select id="teamA-division">
+                            <option value="1">Division 1</option>
+                            <option value="2">Division 2</option>
+                            <option value="3">Division 3</option>
+                            <option value="4">Division 4</option>
+                            <option value="5">Division 5</option>
+                            <option value="6">Division 6</option>
+                            <option value="7">Division 7</option>
+                            <option value="8">Division 8</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="teamA-league">League:</label>
+                        <select id="teamA-league"></select>
+                    </div>
+                </div>
+                <div class="team">
+                    <h2>Team B</h2>
+                    <div class="input-group">
+                        <label for="teamB-division">Division:</label>
+                        <select id="teamB-division">
+                            <option value="1">Division 1</option>
+                            <option value="2">Division 2</option>
+                            <option value="3">Division 3</option>
+                            <option value="4">Division 4</option>
+                            <option value="5">Division 5</option>
+                            <option value="6">Division 6</option>
+                            <option value="7">Division 7</option>
+                            <option value="8">Division 8</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="teamB-league">League:</label>
+                        <select id="teamB-league"></select>
+                    </div>
+                </div>
+            </div>
+            <button id="calculate">Calculate Convergence</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
