@@ -31,11 +31,6 @@ function getPromotedLeague(currentLeague) {
     return Math.ceil(currentLeague / 2);
 }
 
-// Function to calculate which league a team will be in after relegation
-function getRelegatedLeague(currentLeague) {
-    return (currentLeague - 1) * 2 + 1;
-}
-
 // Function to calculate convergence
 function calculateConvergence(divA, leagueA, divB, leagueB) {
     console.log('Calculating convergence for:', { divA, leagueA, divB, leagueB });
@@ -57,26 +52,16 @@ function calculateConvergence(divA, leagueA, divB, leagueB) {
 
     // Keep calculating until teams converge
     while (currentDivA !== currentDivB || currentLeagueA !== currentLeagueB) {
-        // Team A promotion/relegation
-        if (currentDivA > currentDivB) {
-            // Team A needs to be promoted
+        // Team A promotion
+        if (currentDivA > 1) {
             currentDivA--;
             currentLeagueA = getPromotedLeague(currentLeagueA);
-        } else if (currentDivA < currentDivB) {
-            // Team A needs to be relegated
-            currentDivA++;
-            currentLeagueA = getRelegatedLeague(currentLeagueA);
         }
 
-        // Team B promotion/relegation
-        if (currentDivB > currentDivA) {
-            // Team B needs to be promoted
+        // Team B promotion
+        if (currentDivB > 1) {
             currentDivB--;
             currentLeagueB = getPromotedLeague(currentLeagueB);
-        } else if (currentDivB < currentDivA) {
-            // Team B needs to be relegated
-            currentDivB++;
-            currentLeagueB = getRelegatedLeague(currentLeagueB);
         }
 
         // If teams are in the same division but different leagues, they need to merge
