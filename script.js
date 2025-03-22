@@ -26,6 +26,80 @@ function showSuccess(message) {
     resultDiv.style.color = '#2c3e50';
 }
 
+// Function to calculate which league a team will be in after promotion
+function getPromotedLeague(currentLeague) {
+    return Math.ceil(currentLeague / 2);
+}
+
+// Function to calculate which league a team will be in after relegation
+function getRelegatedLeague(currentLeague) {
+    return (currentLeague - 1) * 2 + 1;
+}
+
+// Function to calculate convergence
+function calculateConvergence(divA, leagueA, divB, leagueB) {
+    console.log('Calculating convergence for:', { divA, leagueA, divB, leagueB });
+    
+    // If teams are in the same division and league, they're already together
+    if (divA === divB && leagueA === leagueB) {
+        return {
+            division: divA,
+            league: leagueA,
+            seasons: 0
+        };
+    }
+
+    let currentDivA = divA;
+    let currentLeagueA = leagueA;
+    let currentDivB = divB;
+    let currentLeagueB = leagueB;
+    let seasons = 0;
+
+    // Keep calculating until teams converge
+    while (currentDivA !== currentDivB || currentLeagueA !== currentLeagueB) {
+        // Team A promotion/relegation
+        if (currentDivA > currentDivB) {
+            // Team A needs to be promoted
+            currentDivA--;
+            currentLeagueA = getPromotedLeague(currentLeagueA);
+        } else if (currentDivA < currentDivB) {
+            // Team A needs to be relegated
+            currentDivA++;
+            currentLeagueA = getRelegatedLeague(currentLeagueA);
+        }
+
+        // Team B promotion/relegation
+        if (currentDivB > currentDivA) {
+            // Team B needs to be promoted
+            currentDivB--;
+            currentLeagueB = getPromotedLeague(currentLeagueB);
+        } else if (currentDivB < currentDivA) {
+            // Team B needs to be relegated
+            currentDivB++;
+            currentLeagueB = getRelegatedLeague(currentLeagueB);
+        }
+
+        // If teams are in the same division but different leagues, they need to merge
+        if (currentDivA === currentDivB && currentLeagueA !== currentLeagueB) {
+            // Teams will merge into the lower league number
+            currentLeagueA = Math.min(currentLeagueA, currentLeagueB);
+            currentLeagueB = currentLeagueA;
+        }
+
+        seasons++;
+        console.log(`Season ${seasons}:`, {
+            teamA: { division: currentDivA, league: currentLeagueA },
+            teamB: { division: currentDivB, league: currentLeagueB }
+        });
+    }
+
+    return {
+        division: currentDivA,
+        league: currentLeagueA,
+        seasons: seasons
+    };
+}
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing...');
@@ -65,68 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             option.textContent = `League ${i}`;
             leagueSelect.appendChild(option);
         }
-    }
-
-    // Function to calculate convergence
-    function calculateConvergence(divA, leagueA, divB, leagueB) {
-        console.log('Calculating convergence for:', { divA, leagueA, divB, leagueB });
-        
-        // If teams are in the same division and league, they're already together
-        if (divA === divB && leagueA === leagueB) {
-            return {
-                division: divA,
-                league: leagueA,
-                seasons: 0
-            };
-        }
-
-        let currentDivA = divA;
-        let currentLeagueA = leagueA;
-        let currentDivB = divB;
-        let currentLeagueB = leagueB;
-        let seasons = 0;
-        let maxSeasons = 100; // Prevent infinite loops
-
-        // Keep calculating until teams converge
-        while ((currentDivA !== currentDivB || currentLeagueA !== currentLeagueB) && seasons < maxSeasons) {
-            // Team A promotion/relegation
-            if (currentDivA > currentDivB) {
-                // Team A needs to be promoted
-                currentDivA--;
-                currentLeagueA = Math.ceil(currentLeagueA / 2);
-            } else if (currentDivA < currentDivB) {
-                // Team A needs to be relegated
-                currentDivA++;
-                currentLeagueA = (currentLeagueA - 1) * 2 + 1;
-            }
-
-            // Team B promotion/relegation
-            if (currentDivB > currentDivA) {
-                // Team B needs to be promoted
-                currentDivB--;
-                currentLeagueB = Math.ceil(currentLeagueB / 2);
-            } else if (currentDivB < currentDivA) {
-                // Team B needs to be relegated
-                currentDivB++;
-                currentLeagueB = (currentLeagueB - 1) * 2 + 1;
-            }
-
-            seasons++;
-            console.log(`Season ${seasons}:`, {
-                teamA: { division: currentDivA, league: currentLeagueA },
-                teamB: { division: currentDivB, league: currentLeagueB }
-            });
-        }
-
-        if (seasons >= maxSeasons) {
-            throw new Error('Could not calculate convergence - too many seasons required');
-        }
-
-        return {
-            division: currentDivA,
-            league: currentLeagueA,
-            seasons: seasons
-        };
     }
 
     // Event Listeners
